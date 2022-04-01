@@ -45,10 +45,14 @@ dropdowns = webadvisor_soup.find_all('select')
 # terms list
 terms = webadvisor_soup.find(id = "MainContent_ddlTerm")
 terms = re.findall("value=\"([0-9]{2}/[A-Z]{2})", str(terms))
+term_id = webadvisor_soup.find(id = "MainContent_ddlTerm")
+term_names = re.findall(">(.+?)</option>", str(term_id))
 
 # subjects list
 subjects = webadvisor_soup.find(id = "MainContent_ddlSubj_1")
-subjects = re.findall("value=\"([A-Z]{2})", str(subjects))
+subjects = re.findall("value=\"([\w]+)\">", str(subjects))
+subject_id = webadvisor_soup.find(id = "MainContent_ddlSubj_1")
+subject_names = re.findall(">(.+?)</option>", str(subject_id))
 
 # arguments list
 arguments_string = ""
@@ -72,8 +76,8 @@ elif(re.search('-terms', arguments_string)):
     #terms = webadvisor_soup.find(id = "MainContent_ddlTerm")
     #terms = re.findall("value=\"([0-9]{2}/[A-Z]{2})", str(terms))
     print("Terms:")
-    for term in terms:
-        print("\t" + term)
+    for term in term_names:
+        print(term)
     sys.exit() 
 
 # -subjects: list all currently available Subjects
@@ -82,10 +86,8 @@ elif(re.search('-subjects', arguments_string)):
     #subjects = webadvisor_soup.find(id = "MainContent_ddlSubj_1")
     #subjects = re.findall("value=\"([A-Z]{2})", str(subjects))
     print("Subjects:")
-    subj_string = ""
-    for subject in subjects:
-        subj_string += subject + " "
-    print(subj_string)
+    for subject in subject_names:
+        print(subject)
     sys.exit()
 
 # current term
@@ -118,18 +120,22 @@ for t in terms:
 if not(re.search(term, term_string)):
     # if user-given term is not valid
     print('Invalid Term, please redo command and select one of the valid terms: ')
-    print(terms)
+    for term in term_names:
+        print(term)
+    sys.exit() 
 
 # check if Subject given in command line args
 if(re.search(',[A-Z]{2}', arguments_string)):
     # subject = user-given subject
-    subject = re.findall(',([A-Z]{2})', arguments_string)
+    subject = re.findall(',([A-Z]{3}|[A-Z]{2})', arguments_string)
     subject = subject[0]
 else:
     # set subject for debugging
     subject = 'N/A'
     print('Forgot to add Subject. Options are: ')
-    print(subjects)
+    for subject in subject_names:
+        print(subject)
+    sys.exit()
 # print(subject)
 # check user-subject given is valid (in the subjects list from website)
 subjects_string = ''
@@ -138,7 +144,8 @@ for s in subjects:
 if not(re.search(subject, subjects_string)):
     # if user-given subject is not valid
     print('Invalid Subject, please redo command and select one of the valid subjects: ')
-    print(subjects)
+    for subject in subject_names:
+        print(subject)
     sys.exit()
 
 # webdriver
